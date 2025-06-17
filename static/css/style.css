@@ -1,0 +1,99 @@
+
+body {
+    margin: 0;
+    font-family: 'Pretendard', sans-serif;
+    background: #f6f9fc;
+}
+.dashboard {
+    display: flex;
+}
+.sidebar {
+    width: 220px;
+    background: #1e293b;
+    color: white;
+    height: 100vh;
+    padding: 2rem 1rem;
+}
+.sidebar h2 {
+    text-align: center;
+    font-size: 1.5rem;
+}
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 2rem;
+}
+.sidebar li {
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+    border-radius: 6px;
+}
+.sidebar li.active, .sidebar li:hover {
+    background: #334155;
+}
+.sidebar .version {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.9rem;
+}
+.content {
+    flex-grow: 1;
+    padding: 2rem;
+}
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.cards {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+.card {
+    flex: 1;
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.card h3 {
+    margin: 0 0 0.5rem 0;
+}
+.card p {
+    font-size: 1.5rem;
+}
+.card .small {
+    font-size: 0.8rem;
+    color: #666;
+}
+.charts {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+.chart-box {
+    flex: 1;
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+}
+.logs {
+    margin-top: 2rem;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+th, td {
+    padding: 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}

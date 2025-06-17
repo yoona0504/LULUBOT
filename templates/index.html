@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>루루봇 대시보드</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/webcam.js') }}"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <h2>LULUBOT</h2>
+            <ul>
+                <li class="active">대시보드</li>
+                <li>감정 분석</li>
+                <li>성격 특성</li>
+                <li>대화 기록</li>
+                <li>설정</li>
+            </ul>
+            <div class="version">v1.2.3</div>
+        </aside>
+        <main class="content">
+            <header>
+                <h1>루루봇 대시보드</h1>
+                <div class="user">관리자</div>
+            </header>
+
+            <section class="cards">
+                <div class="card"><h3>😊 현재 감정</h3><p>행복<br><span class="small">3시간 연속 유지</span></p></div>
+                <div class="card"><h3>💬 오늘의 대화</h3><p>24<br><span class="small">어제보다 +5</span></p></div>
+                <div class="card"><h3>🎯 얼굴 인식 정확도</h3><p>98%<br><span class="small">지난주보다 +2%</span></p></div>
+                <div class="card"><h3>🔋 배터리 상태</h3><p>78%<br><span class="small">약 5시간 남음</span></p></div>
+            </section>
+
+            <section class="charts">
+                <div class="chart-box">
+                    <h3>최근 감정 추이</h3>
+                    <canvas id="emotionTrend"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>성격 특성</h3>
+                    <canvas id="personalityChart"></canvas>
+                </div>
+            </section>
+
+            <section class="logs">
+                <h3>최근 대화</h3>
+                <table>
+                    <thead><tr><th>시간</th><th>질문</th><th>응답</th><th>감정</th></tr></thead>
+                    <tbody>
+                        <tr><td>15:23</td><td>오늘 날씨 어때?</td><td>오늘은 맑고 화창한 날씨예요. 기분이 좋아 보이시네요!</td><td>😊 행복</td></tr>
+                        <tr><td>16:05</td><td>내일 일정 알려줘</td><td>내일은 오후 2시에 회의가 있어요. 미리 준비하셔요.</td><td>🟢 중립</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="emotion-analysis">
+                <h3>실시간 감정 분석</h3>
+                <video id="video" width="400" autoplay playsinline></video><br>
+                <button id="captureBtn" onclick="capture()" disabled>루루봇에게 감정 보여주기</button><br>
+                <img id="photo" /><br>
+                <p id="response"></p>
+                <canvas id="emotionChart"></canvas>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
