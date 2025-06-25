@@ -17,6 +17,23 @@ from log_utils import save_emotion_log, load_recent_logs
 
 app = Flask(__name__)
 
+@app.route('/video_feed')
+def video_feed():
+    def gen_frames():
+    cap = cv2.VideoCapture(0)
+    while True:
+        success, frame = cap.read()
+        if not success:
+            break
+        else:
+            # 이 자리에서 감정 분석할 수도 있음
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
 @app.route('/dashboard')
 def dashboard():
     # 감정 분석 결과 가져오기 (테스트용으로 고정값)
@@ -32,7 +49,6 @@ def dashboard():
     logs = load_recent_logs(limit=6)
 
     return render_template("dashboard.html", emotions=emotion_result, logs=logs)
-
 
 @app.route('/')
 def index():

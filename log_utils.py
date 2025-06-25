@@ -21,3 +21,4 @@ def load_recent_logs(limit=10):
             ]
     except FileNotFoundError:
         return []
+    

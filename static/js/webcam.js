@@ -1,66 +1,82 @@
+// 웹캠 연결
+const video = document.getElementById('video');
+const photo = document.getElementById('photo');
+const responseText = document.getElementById('response');
+const captureBtn = document.getElementById('captureBtn');
+const emotionChartCtx = document.getElementById('emotionChart').getContext('2d');
 
+let stream = null;
+let emotionChart = null;
+
+// 1. 웹캠 시작
 navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
-        const video = document.getElementById('video');
-        video.srcObject = stream;
-        video.onloadedmetadata = () => {
-            document.getElementById('captureBtn').disabled = false;
-        };
-    });
+  .then(s => {
+    stream = s;
+    video.srcObject = stream;
+    captureBtn.disabled = false;
+  })
+  .catch(err => {
+    console.error("웹캠 접근 실패:", err);
+    captureBtn.disabled = true;
+  });
 
+// 2. 버튼 클릭 시 캡처 + 분석
 function capture() {
-    const video = document.getElementById('video');
-    if (video.videoWidth === 0 || video.videoHeight === 0) {
-        alert("카메라 준비 중입니다. 잠시 후 다시 시도해주세요.");
-        return;
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // 이미지 표시
+  const imageDataURL = canvas.toDataURL('image/jpeg');
+  photo.src = imageDataURL;
+
+  // 서버로 전송
+  fetch('/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image: imageDataURL })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.error) {
+      responseText.textContent = '오류: ' + data.error;
+      return;
     }
 
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    const dataUrl = canvas.toDataURL('image/jpeg');
-    document.getElementById('photo').src = dataUrl;
+    responseText.textContent = `루루봇: ${data.response} (감정: ${data.dominant})`;
 
-    fetch('/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: dataUrl })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) {
-            alert(data.error);
-            return;
-        }
+    // 차트 업데이트
+    updateChart(data.emotions);
+  })
+  .catch(err => {
+    console.error(err);
+    responseText.textContent = '분석 실패';
+  });
+}
 
-        document.getElementById('response').innerText = data.response;
+// 3. 감정 차트 그리기
+function updateChart(emotions) {
+  const labels = Object.keys(emotions);
+  const values = labels.map(label => Math.round(emotions[label] * 100));
 
-        const ctx = document.getElementById('emotionChart').getContext('2d');
-        const labels = Object.keys(data.emotions);
-        const values = Object.values(data.emotions);
+  if (emotionChart) emotionChart.destroy();
 
-        if (window.emotionChart) window.emotionChart.destroy();
-        window.emotionChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: '감정 확률 (%)',
-                    data: values,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100
-                    }
-                }
-            }
-        });
-    });
+  emotionChart = new Chart(emotionChartCtx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '감정 분석 (%)',
+        data: values,
+        backgroundColor: 'rgba(54, 162, 235, 0.6)'
+      }]
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true, max: 100 }
+      }
+    }
+  });
 }
