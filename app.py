@@ -1,74 +1,65 @@
+navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+        const video = document.getElementById('video');
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+            document.getElementById('captureBtn').disabled = false;
+        };
+    });
 
-from flask import Flask, render_template, request, jsonify
-import base64
-import numpy as np
-import cv2
-from flask import Flask, render_template
-from emotion_analysis import analyze_emotion
-from log_utils import save_emotion_log, load_recent_logs
-from emotion_response import get_emotion_response
-
-
-app = Flask(__name__)
-
-from flask import Flask, render_template
-from emotion_analysis import analyze_emotion  # 기존 로직
-from log_utils import save_emotion_log, load_recent_logs
-
-app = Flask(__name__)
-
-@app.route('/video_feed')
-def video_feed():
-    def gen_frames():
-    cap = cv2.VideoCapture(0)
-    while True:
-        success, frame = cap.read()
-        if not success:
-            break
-        else:
-            # 이 자리에서 감정 분석할 수도 있음
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
-@app.route('/dashboard')
-def dashboard():
-    # 감정 분석 결과 가져오기 (테스트용으로 고정값)
-    emotion_result = {
-        "Happy": 0.65,
-        "Sad": 0.20,
-        "Angry": 0.10,
-        "Neutral": 0.05
+function capture() {
+    const video = document.getElementById('video');
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+        alert("카메라 준비 중입니다. 잠시 후 다시 시도해주세요.");
+        return;
     }
 
-    # 로그 저장 및 불러오기
-    save_emotion_log(emotion_result)
-    logs = load_recent_logs(limit=6)
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg');
+    document.getElementById('photo').src = dataUrl;
 
-    return render_template("dashboard.html", emotions=emotion_result, logs=logs)
+    fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: dataUrl })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+        document.getElementById('response').innerText = data.response;
 
-@app.route('/analyze', methods=['POST'])
-def analyze():
-    try:
-        data = request.json['image']
-        _, encoded = data.split(",", 1)
-        img_data = base64.b64decode(encoded)
-        np_arr = np.frombuffer(img_data, np.uint8)
-        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        const ctx = document.getElementById('emotionChart').getContext('2d');
+        const labels = Object.keys(data.emotions);
+        const values = Object.values(data.emotions).map(v => v * 100);
 
-        emotions, dominant = analyze_emotion(frame)
-        response = get_emotion_response(dominant)
-
-        return jsonify({'emotions': emotions, 'response': response, 'dominant': dominant})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-if __name__ == "__main__":
-    app.run(debug=True)
+        if (window.emotionChart) window.emotionChart.destroy();
+        window.emotionChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '감정 확률 (%)',
+                    data: values,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    });
+}
