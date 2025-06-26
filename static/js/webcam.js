@@ -14,6 +14,11 @@ navigator.mediaDevices.getUserMedia({ video: true })
     stream = s;
     video.srcObject = stream;
     captureBtn.disabled = false;
+
+    // 분석 자동 시작
+    setInterval(() => {
+      capture();  // 캡처 및 서버 전송 반복
+    }, 2000);  // 2초마다 감정 분석 요청
   })
   .catch(err => {
     console.error("웹캠 접근 실패:", err);
@@ -38,22 +43,22 @@ function capture() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ image: imageDataURL })
   })
-  .then(res => res.json())
-  .then(data => {
-    if (data.error) {
-      responseText.textContent = '오류: ' + data.error;
-      return;
-    }
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        responseText.textContent = '오류: ' + data.error;
+        return;
+      }
 
-    responseText.textContent = `루루봇: ${data.response} (감정: ${data.dominant})`;
+      responseText.textContent = `루루봇: ${data.response} (감정: ${data.dominant})`;
 
-    // 차트 업데이트
-    updateChart(data.emotions);
-  })
-  .catch(err => {
-    console.error(err);
-    responseText.textContent = '분석 실패';
-  });
+      // 차트 업데이트
+      updateChart(data.emotions);
+    })
+    .catch(err => {
+      console.error(err);
+      responseText.textContent = '분석 실패';
+    });
 }
 
 // 3. 감정 차트 그리기
