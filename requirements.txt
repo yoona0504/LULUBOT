@@ -1,4 +1,4 @@
 flask
 opencv-python
-deepface
-numpy
+face_recognition
+tensorflow
