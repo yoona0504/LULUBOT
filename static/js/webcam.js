@@ -15,29 +15,32 @@ navigator.mediaDevices.getUserMedia({ video: true })
     video.srcObject = stream;
     captureBtn.disabled = false;
 
-    // 분석 자동 시작
+    // 자동 분석 시작
     setInterval(() => {
-      capture();  // 캡처 및 서버 전송 반복
-    }, 2000);  // 2초마다 감정 분석 요청
+      capture();
+    }, 2000);
   })
   .catch(err => {
     console.error("웹캠 접근 실패:", err);
     captureBtn.disabled = true;
   });
 
-// 2. 버튼 클릭 시 캡처 + 분석
+// 2. 감정 분석 함수 (자동 + 수동 모두 사용)
 function capture() {
+  if (video.videoWidth === 0 || video.videoHeight === 0) {
+    console.warn("카메라 준비 중입니다.");
+    return;
+  }
+
   const canvas = document.createElement('canvas');
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   const ctx = canvas.getContext('2d');
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  // 이미지 표시
   const imageDataURL = canvas.toDataURL('image/jpeg');
   photo.src = imageDataURL;
 
-  // 서버로 전송
   fetch('/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -51,8 +54,6 @@ function capture() {
       }
 
       responseText.textContent = `루루봇: ${data.response} (감정: ${data.dominant})`;
-
-      // 차트 업데이트
       updateChart(data.emotions);
     })
     .catch(err => {

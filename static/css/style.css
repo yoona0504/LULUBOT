@@ -1,12 +1,16 @@
-
+/* 기본 설정 */
 body {
     margin: 0;
     font-family: 'Pretendard', sans-serif;
     background: #f6f9fc;
 }
+
+/* 전체 레이아웃 */
 .dashboard {
     display: flex;
 }
+
+/* 사이드바 */
 .sidebar {
     width: 220px;
     background: #1e293b;
@@ -28,7 +32,8 @@ body {
     cursor: pointer;
     border-radius: 6px;
 }
-.sidebar li.active, .sidebar li:hover {
+.sidebar li.active,
+.sidebar li:hover {
     background: #334155;
 }
 .sidebar .version {
@@ -36,15 +41,21 @@ body {
     text-align: center;
     font-size: 0.9rem;
 }
+
+/* 메인 콘텐츠 */
 .content {
     flex-grow: 1;
     padding: 2rem;
 }
+
+/* 헤더 */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
+
+/* 카드 섹션 */
 .cards {
     display: flex;
     gap: 1rem;
@@ -71,6 +82,8 @@ header {
     font-size: 0.8rem;
     color: #666;
 }
+
+/* 차트 섹션 */
 .charts {
     display: flex;
     gap: 2rem;
@@ -81,7 +94,10 @@ header {
     background: white;
     padding: 1rem;
     border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
+
+/* 로그 섹션 */
 .logs {
     margin-top: 2rem;
 }
@@ -96,4 +112,55 @@ th, td {
     padding: 0.8rem;
     text-align: left;
     border-bottom: 1px solid #eee;
+}
+
+/* 실시간 감정 분석 섹션 */
+.emotion-analysis {
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-top: 2rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.emotion-analysis h3 {
+    margin-top: 0;
+}
+#photo {
+    max-width: 100%;
+    margin-top: 1rem;
+    border-radius: 6px;
+}
+#response {
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+/* 버튼 스타일 */
+button {
+    padding: 0.5rem 1rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s ease;
+}
+button:hover {
+    background: #2563eb;
+}
+button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* 반응형 대응 (선택) */
+@media (max-width: 768px) {
+    .cards,
+    .charts {
+        flex-direction: column;
+    }
+    .sidebar {
+        display: none;
+    }
 }
